@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /admin
+# Add your sitemap after deploying, e.g.:
+# Sitemap: https://api.your-domain.com/sitemap.xml
