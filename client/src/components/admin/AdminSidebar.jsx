@@ -7,7 +7,8 @@ import {
   ClipboardCheck, 
   MessageSquare, 
   Settings, 
-  LogOut 
+  LogOut,
+  Newspaper
 } from 'lucide-react';
 import { ADMIN_PATHS } from '../../routes/adminRoutes.js';
 
@@ -17,6 +18,7 @@ const navItems = [
   { label: 'Categories', to: ADMIN_PATHS.categories, icon: Tags },
   { label: 'Orders', to: ADMIN_PATHS.orders, icon: ClipboardCheck },
   { label: 'Enquiries', to: ADMIN_PATHS.enquiries, icon: MessageSquare },
+  { label: 'Blogs', to: ADMIN_PATHS.blogs, icon: Newspaper },
   { label: 'Settings', to: ADMIN_PATHS.settings, icon: Settings },
 ];
 

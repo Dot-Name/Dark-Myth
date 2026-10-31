@@ -10,7 +10,7 @@ import hero4 from '../assets/hero4.jpg';
 const empty = { name: '', email: '', subject: '', message: '', website: '' };
 
 export default function Contact() {
-  useSeo({ title: 'Contact', description: 'Get in touch with Dark Myth about books, orders and collaborations.' });
+  useSeo({ title: 'Contact Dark Myth | Get in Touch', description: 'Have questions about Dark Myth coloring books, orders, or collaborations? Get in touch with our team.' });
   const { data: s } = useFetch(() => api.get('/settings'), []);
   const [f, setF] = useState(empty);
   const [busy, setBusy] = useState(false);

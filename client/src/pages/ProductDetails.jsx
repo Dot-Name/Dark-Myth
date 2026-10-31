@@ -17,7 +17,8 @@ export default function ProductPage() {
   const book = data?.book;
   const preview = sp.get('preview') === '1' || book?.status === 'draft';
 
-  useSeo({ title: book?.seoTitle || book?.title, description: book?.seoDescription || book?.shortDescription, image: book?.cover?.url && img(book.cover.url, 1200), noindex: preview });
+  const productUrl = `${(import.meta.env.VITE_SITE_URL || window.location.origin).replace(/\/$/, '')}/catalogue/${slug}`;
+  useSeo({ title: book ? `${book.seoTitle || book.title} | Dark Myth` : 'Horror coloring books | Dark Myth', description: book?.seoDescription || book?.shortDescription || 'Explore horror coloring books and dark art at Dark Myth.', image: book?.cover?.url && img(book.cover.url, 1200), canonical: productUrl, noindex: preview, jsonLd: book ? { '@context': 'https://schema.org', '@graph': [{ '@type': 'Product', name: book.title, description: book.description || book.shortDescription, image: book.cover?.url ? [book.cover.url] : undefined, sku: book.slug, url: productUrl, offers: { '@type': 'Offer', priceCurrency: 'INR', price: book.isFree ? 0 : book.price } }, { '@type':'BreadcrumbList', itemListElement:[{ '@type':'ListItem',position:1,name:'Home',item:`${window.location.origin}/`},{'@type':'ListItem',position:2,name:'Catalogue',item:`${window.location.origin}/catalogue`},{'@type':'ListItem',position:3,name:book.title,item:productUrl}] }] } : undefined });
 
   if (loading) return <div className="container-page py-16"><div className="skeleton h-96 w-full" /></div>;
   if (error?.response?.status === 404) return <div className="container-page py-20"><ErrorState error={{ userMessage: 'This book could not be found. It may have been unpublished.' }} /><p className="mt-6 text-center"><Link className="underline" to="/catalogue">Back to the catalogue</Link></p></div>;

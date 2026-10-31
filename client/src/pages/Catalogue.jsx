@@ -14,7 +14,7 @@ import Pagination from '../components/common/Pagination.jsx';
 import { TYPE_LABELS } from '../utils/format.js';
 
 export default function Catalogue() {
-  useSeo({ title: 'Catalogue', description: 'Browse Indian horror books, haunted place guides, folklore collections and horror colouring books.' });
+  useSeo({ title: 'Horror Coloring Books Collection | Dark Myth', description: 'Discover the Dark Myth collection of horror coloring books featuring creepy characters, gothic artwork, haunted worlds, and dark illustrations.' });
   const [sp, setSp] = useSearchParams();
   const category = sp.get('category') || '';
   const type = sp.get('type') || '';

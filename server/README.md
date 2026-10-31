@@ -1,11 +1,12 @@
 # DARK MYTH API
 
-Express and Mongoose API for the DARK MYTH catalogue, admin dashboard, WhatsApp order records, enquiries, and contact settings. The existing public API is versioned under `/api/v1`.
+Express and Mongoose API for the DARK MYTH catalogue, blog, admin dashboard, WhatsApp order records, enquiries, and contact settings. The API is versioned under `/api/v1`.
 
 ## Existing architecture
 
 - Node.js ES modules, Express 4, MongoDB Atlas through Mongoose.
 - Models: `Admin`, `Book`, `Category`, `Order`, `Enquiry`, and `Setting`.
+- Blogs use their own `Blog` model and text category fields, separate from product categories.
 - Admin authentication uses bcrypt password hashes, a JWT in an HttpOnly cookie, and a CSRF header for writes. There is no public admin registration.
 - Checkout is recorded as a WhatsApp/manual payment workflow. The API does not create or verify gateway transactions. An admin manually verifies payment before granting a one-time access code.
 - Images and PDFs use Cloudinary; PDFs are private and downloaded through short-lived signed URLs.
@@ -37,8 +38,22 @@ All routes below are prefixed with `/api/v1`.
 | Categories | `GET/POST /admin/categories`, `PATCH/DELETE /admin/categories/:id` |
 | Orders/access | `GET/POST /admin/orders`, `PATCH /admin/orders/:id` |
 | Enquiries | `GET /admin/enquiries`, `PATCH /admin/enquiries/:id` |
+| Public blogs | `GET /blogs`, `/blogs/:slug`, `/blogs/featured`, `/blogs/popular`, `/blogs/latest`, `/blogs/category/:slug`, `/blogs/tag/:tag`, `/blogs/search`, `/blogs/:slug/related`, `/blogs/:slug/view`, `/blogs/sitemap.xml`, `/blogs/rss.xml` |
+| Admin blogs | `GET/POST /admin/blogs`, `GET/PUT/DELETE /admin/blogs/:id`, `POST /admin/blogs/:id/images`, `PATCH /admin/blogs/:id/status`, `PATCH /admin/blogs/:id/feature`, `POST /admin/blogs/:id/publish`, `/schedule`, `/duplicate`, and `GET /admin/blogs/analytics` |
 
 Admin write requests must include the `dm_token` cookie and the `X-CSRF-Token` returned by login or `/admin/auth/me`. Admin catalogue filters support `q`, `category`, `type`, `free`, `status`, `sort`, `page`, and `limit`; order and enquiry lists support `q`, `status`, `page`, and `limit`.
+
+### Blog management
+
+Create a draft with `POST /api/v1/admin/blogs` (authenticated cookie and CSRF header):
+
+```json
+{"title":"The Haunted House That Never Sleeps","excerpt":"Some houses are waiting.","content":"<p>A chilling story...</p>","contentType":"horror-story","category":"Ghost Stories","categorySlug":"ghost-stories","tags":["ghost","haunted house"],"seo":{"focusKeyword":"haunted house"}}
+```
+
+The endpoint accepts multipart form data with a `featuredImage` file or JSON without one. Slugs are generated from titles, collision-suffixed, and remain stable after a published title edit. An explicitly changed published slug appends its former slug to `slugHistory`; old slug aliases are resolved to the current post. SEO title/description, Open Graph, Twitter fields, canonical URL, robots directives, and BlogPosting JSON-LD are returned for public pages. Supplied SEO values persist on updates; unspecified values are generated from title/content. Rich text is reduced to a safe HTML tag/attribute allowlist and plain text drives excerpt fallback and reading-time calculations.
+
+Schedule with `POST /api/v1/admin/blogs/:id/schedule` and `{ "scheduledAt": "2030-01-01T12:00:00Z" }`. The database-backed worker runs on startup and every minute, so scheduled records persist across restarts. Related book IDs are checked against `Book`. Featured-image uploads reuse Cloudinary validation and lifecycle helpers. Public blog listings accept `page`, `limit`, `search`, `category`, `tag`, `contentType`, `sortBy`, and `order`.
 
 Responses use `{ success, data }` on success and `{ success: false, code, message, errors? }` on errors. Catalogue and list endpoints include `pagination` inside `data`.
 

@@ -14,3 +14,4 @@ export const apiLimiter = make(env.RATE_LIMIT_MAX, 'Too many requests. Please tr
 export const loginLimiter = make(env.LOGIN_RATE_LIMIT_MAX, 'Too many login attempts. Please try again later.');
 export const contactLimiter = make(env.CONTACT_RATE_LIMIT_MAX, 'Too many messages sent. Please try again later.');
 export const downloadLimiter = make(30, 'Too many download requests. Please try again later.');
+export const searchLimiter = make(40, 'Too many blog search or view requests. Please try again later.');

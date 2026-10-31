@@ -8,6 +8,7 @@ import LoadingSkeleton from '../components/common/LoadingSkeleton.jsx';
 import HeroTileAnimation from '../components/home/HeroTileAnimation.jsx';
 import { ArrowDown, ArrowRight, ArrowUpRight, BookOpen, Library, Palette } from 'lucide-react';
 import heroImage from '../assets/hero.webp';
+import logo from '../assets/logo.png';
 import fortScene from '../assets/hero1.jpg';
 import stepwellScene from '../assets/hero2.jpg';
 import villageScene from '../assets/hero3.jpg';
@@ -36,7 +37,7 @@ function Section({ title, link, children }) {
 
 export default function Home() {
   const heroMediaRef = useRef(null);
-  useSeo({});
+  useSeo({ title: 'Dark Myth | Horror Coloring Books & Dark Art', description: 'Explore eerie horror coloring books, haunting illustrations, dark fantasy artwork, and mysterious worlds at Dark Myth.', jsonLd: { '@context': 'https://schema.org', '@graph': [{ '@type': 'Organization', name: 'Dark Myth', url: `${window.location.origin}/`, logo: new URL(logo, window.location.href).href }, { '@type': 'WebSite', name: 'Dark Myth', url: `${window.location.origin}/`, description: 'Horror coloring books, dark art, and folklore.' }] } });
   const featured = useFetch(() => api.get('/books/featured'), []);
   const fresh = useFetch(() => api.get('/books', { params: { sort: 'newest', limit: 4 } }), []);
   const cats = useFetch(() => api.get('/categories'), []);

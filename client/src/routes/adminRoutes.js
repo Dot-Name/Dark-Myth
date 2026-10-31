@@ -9,6 +9,9 @@ export const ADMIN_PATHS = Object.freeze({
   orders: '/admin/orders',
   enquiries: '/admin/enquiries',
   settings: '/admin/settings',
+  blogs: '/admin/blogs',
+  newBlog: '/admin/blogs/new',
+  editBlog: (id = ':id') => `/admin/blogs/${id}/edit`,
   login: '/admin/login',
 });
 
@@ -21,4 +24,7 @@ export const ADMIN_ROUTE_SEGMENTS = Object.freeze({
   orders: 'orders',
   enquiries: 'enquiries',
   settings: 'settings',
+  blogs: 'blogs',
+  newBlog: 'blogs/new',
+  editBlog: 'blogs/:id/edit',
 });

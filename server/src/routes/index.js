@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authenticate, enforcePasswordChange, optionalAdmin } from '../middleware/auth.js';
 import { contactLimiter, downloadLimiter, loginLimiter } from '../middleware/limiters.js';
-import { bookUpload, categoryUpload } from '../middleware/upload.js';
+import { bookUpload, categoryUpload, blogInlineUpload } from '../middleware/upload.js';
 import { validate } from '../utils/http.js';
 import * as S from '../validators/schemas.js';
 import * as auth from '../controllers/auth.js';
@@ -9,12 +9,17 @@ import * as books from '../controllers/books.js';
 import * as cats from '../controllers/categories.js';
 import * as orders from '../controllers/orders.js';
 import * as misc from '../controllers/misc.js';
+import blogRoutes from './blogs.js';
+import * as blogs from '../controllers/blogs.js';
+import { blogUpload } from '../middleware/upload.js';
+import { blogQuery, createBlog, updateBlog, schedule as scheduleSchema, statusSchema, featureSchema, inlineImageMeta } from '../validators/blogSchemas.js';
 
 const router = Router();
 const id = validate(S.idParam, 'params');
 
 /* ---------- public ---------- */
 router.get('/health', (req, res) => res.json({ success: true, data: { status: 'ok' } }));
+router.use('/blogs', blogRoutes);
 router.get('/books', validate(S.bookQuery, 'query'), books.listPublic);
 router.get('/books/featured', books.featured);
 router.get('/books/:id/download', downloadLimiter, id, books.download);
@@ -37,6 +42,19 @@ admin.get('/settings', misc.adminSettings); // read-only, harmless during forced
 admin.use(enforcePasswordChange);
 
 admin.get('/dashboard', misc.dashboard);
+
+admin.get('/blogs/analytics', blogs.analytics);
+admin.get('/blogs', validate(blogQuery, 'query'), blogs.listAdmin);
+admin.post('/blogs', blogUpload, validate(createBlog), blogs.create);
+admin.get('/blogs/:id', id, blogs.getAdmin);
+admin.put('/blogs/:id', id, blogUpload, validate(updateBlog), blogs.update);
+admin.post('/blogs/:id/images', id, blogInlineUpload, validate(inlineImageMeta), blogs.uploadInlineImage);
+admin.delete('/blogs/:id', id, blogs.remove);
+admin.patch('/blogs/:id/status', id, validate(statusSchema), blogs.changeStatus);
+admin.patch('/blogs/:id/feature', id, validate(featureSchema), blogs.feature);
+admin.post('/blogs/:id/publish', id, blogs.publish);
+admin.post('/blogs/:id/schedule', id, validate(scheduleSchema), blogs.schedule);
+admin.post('/blogs/:id/duplicate', id, blogs.duplicate);
 
 admin.get('/books', validate(S.bookQuery, 'query'), books.listAdmin);
 admin.post('/books', bookUpload, validate(S.createBookSchema), books.create);

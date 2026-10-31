@@ -37,6 +37,7 @@ export default function Header() {
             </div>
           </div>
           <NavLink to="/about" className={link}>About</NavLink>
+          <NavLink to="/blog" className={link}>Blog</NavLink>
           <NavLink to="/contact" className={link}>Contact</NavLink>
         </nav>
         <div className="flex items-center gap-2">
@@ -75,6 +76,7 @@ export default function Header() {
               {cats.map((c) => <Link key={c.id} to={`/catalogue?category=${c.slug}`} onClick={() => setOpen(false)} className="block py-2 text-sm text-muted transition-colors hover:text-blood">{c.name}</Link>)}
             </div>}
             <NavLink to="/about" className={link} onClick={() => setOpen(false)}>About</NavLink>
+            <NavLink to="/blog" className={link} onClick={() => setOpen(false)}>Blog</NavLink>
             <NavLink to="/contact" className={link} onClick={() => setOpen(false)}>Contact</NavLink>
           </div>
         </nav>

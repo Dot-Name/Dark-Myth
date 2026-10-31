@@ -17,3 +17,5 @@ export const bookUpload = base.fields([
   { name: 'pdf', maxCount: 1 },
 ]);
 export const categoryUpload = base.single('image');
+export const blogUpload = base.single('featuredImage');
+export const blogInlineUpload = base.single('image');

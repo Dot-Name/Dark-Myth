@@ -4,7 +4,7 @@ import hero3 from '../assets/hero3.jpg';
 import hero5 from '../assets/hero5.jpg';
 
 export default function About() {
-  useSeo({ title: 'About', description: 'Dark Myth makes atmospheric books rooted in Indian horror, folklore and supernatural legend.' });
+  useSeo({ title: 'About Dark Myth | Explore the World of Dark Art', description: 'Discover Dark Myth, a world of horror-inspired coloring books, gothic illustrations, dark imagination, and mysterious creativity.' });
   return (
     <div className="container-page py-14 sm:py-20">
       <h1 className="heading-xl max-w-3xl">Quiet books for restless nights.</h1>

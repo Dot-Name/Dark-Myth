@@ -7,7 +7,7 @@ const COPY = {
 
 export default function Legal({ kind }) {
   const c = COPY[kind];
-  useSeo({ title: c.title });
+  useSeo({ title: `${c.title} | Dark Myth`, description: `${c.title} for Dark Myth, including information about our horror books, website, and customer enquiries.` });
   return (
     <div className="container-page max-w-3xl py-14 sm:py-20">
       <h1 className="heading-xl !text-5xl">{c.title}</h1>
