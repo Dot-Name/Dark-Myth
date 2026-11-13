@@ -1,20 +1,29 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import api, { setCsrfToken } from '../services/api.js';
 
 const AuthContext = createContext(null);
+const ADMIN_SESSION_HINT = 'dark-myth-admin-session';
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }) {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { pathname } = useLocation();
 
-  const apply = useCallback((d) => { setCsrfToken(d?.csrfToken); setAdmin(d?.admin || null); return d; }, []);
+  const apply = useCallback((d) => {
+    setCsrfToken(d?.csrfToken);
+    setAdmin(d?.admin || null);
+    if (d?.admin) window.localStorage.setItem(ADMIN_SESSION_HINT, '1');
+    else window.localStorage.removeItem(ADMIN_SESSION_HINT);
+    return d;
+  }, []);
 
   useEffect(() => {
     // Only probe the session when an admin route is open; public visitors never hit the auth API.
-    if (!window.location.pathname.startsWith('/admin')) { setLoading(false); return; }
+    if (!pathname.startsWith('/admin') && window.localStorage.getItem(ADMIN_SESSION_HINT) !== '1') { setLoading(false); return; }
     api.get('/admin/auth/me').then(apply).catch(() => apply(null)).finally(() => setLoading(false));
-  }, [apply]);
+  }, [apply, pathname]);
 
   useEffect(() => {
     const expire = () => apply(null);

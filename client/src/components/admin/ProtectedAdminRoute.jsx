@@ -4,15 +4,18 @@ import toast from 'react-hot-toast';
 import api from '../../services/api.js';
 import useFetch from '../../hooks/useFetch.js';
 import AdminSidebar from './AdminSidebar.jsx';
+import AdminHeader from './AdminHeader.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { ADMIN_PATHS } from '../../routes/adminRoutes.js';
 
 export default function ProtectedAdminRoute() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const { data: user, loading, error } = useFetch(() => api.get('/admin/auth/me'), []);
 
   const handleLogout = async () => {
     try {
-      await api.post('/admin/auth/logout');
+      await logout();
       toast.success('Logged out successfully');
       navigate(ADMIN_PATHS.login);
     } catch {
@@ -34,13 +37,13 @@ export default function ProtectedAdminRoute() {
 
   return (
     <div className="flex h-screen bg-stone-50/50">
-      {/* Sidebar */}
       <AdminSidebar onLogout={handleLogout} />
-
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-8">
-        <Outlet />
-      </main>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <AdminHeader />
+        <main className="flex-1 overflow-y-auto p-8">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { ChevronDown, Menu, Search, X } from 'lucide-react';
 import Logo from '../common/Logo.jsx';
 import api from '../../services/api.js';
 import useFetch from '../../hooks/useFetch.js';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { ADMIN_PATHS } from '../../routes/adminRoutes.js';
 
 const link = ({ isActive }) => `site-nav-link py-2 text-sm transition-colors hover:text-blood ${isActive ? 'is-active text-blood' : 'text-ink'}`;
 
@@ -13,6 +15,7 @@ export default function Header() {
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
   const [q, setQ] = useState('');
   const nav = useNavigate();
+  const { admin } = useAuth();
   const { data } = useFetch(() => api.get('/categories'), []);
   const cats = data?.items || [];
 
@@ -39,6 +42,7 @@ export default function Header() {
           <NavLink to="/about" className={link}>About</NavLink>
           <NavLink to="/blog" className={link}>Blog</NavLink>
           <NavLink to="/contact" className={link}>Contact</NavLink>
+          {admin && <NavLink to={ADMIN_PATHS.dashboard} className={link}>Dashboard</NavLink>}
         </nav>
         <div className="flex items-center gap-2">
           <form onSubmit={submit} className="hidden items-center border border-line/80 bg-white/80 transition-colors focus-within:border-ink sm:flex" role="search">
@@ -78,6 +82,7 @@ export default function Header() {
             <NavLink to="/about" className={link} onClick={() => setOpen(false)}>About</NavLink>
             <NavLink to="/blog" className={link} onClick={() => setOpen(false)}>Blog</NavLink>
             <NavLink to="/contact" className={link} onClick={() => setOpen(false)}>Contact</NavLink>
+            {admin && <NavLink to={ADMIN_PATHS.dashboard} className={link} onClick={() => setOpen(false)}>Dashboard</NavLink>}
           </div>
         </nav>
       )}

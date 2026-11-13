@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sanitizeHtml } from '../src/services/blogService.js';
+import { sanitizeHtml, serializeBlog, snapshotFeaturedImage } from '../src/services/blogService.js';
 import { createBlog } from '../src/validators/blogSchemas.js';
 
 test('rich text keeps supported formatting and strips executable markup', () => {
@@ -22,6 +22,27 @@ test('images retain accessibility text but drop unsafe URLs and arbitrary attrib
   const html = sanitizeHtml('<img src="https://cdn.example/image.webp" alt="A haunted manor" onerror="alert(1)"><img src="data:text/html,bad" alt="bad">');
   assert.match(html, /alt="A haunted manor"/);
   assert.doesNotMatch(html, /onerror|data:text/i);
+});
+
+test('blog serialization exposes featured image thumbnails and alt text', () => {
+  const blog = serializeBlog({
+    _id: 'blog-id',
+    title: 'A haunted manor',
+    featuredImage: { url: 'https://res.cloudinary.com/darkmyth/image/upload/manor.webp', alt: 'Old manor at night' },
+  });
+  assert.deepEqual(blog.featuredImage, {
+    url: 'https://res.cloudinary.com/darkmyth/image/upload/manor.webp',
+    alt: 'Old manor at night',
+  });
+});
+
+test('featured image cleanup keeps a snapshot of the old asset after replacement', () => {
+  const blog = {
+    featuredImage: { publicId: 'old-image', url: 'https://cdn.example/old.webp' },
+  };
+  const previous = snapshotFeaturedImage(blog.featuredImage);
+  blog.featuredImage = { publicId: 'new-image', url: 'https://cdn.example/new.webp' };
+  assert.equal(previous.publicId, 'old-image');
 });
 
 test('blog request schema strips client supplied internal fields', () => {

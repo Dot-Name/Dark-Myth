@@ -43,8 +43,12 @@ export function serializeBlog(b) {
   const o = b.toObject ? b.toObject() : b;
   return { id: String(o._id), title:o.title, slug:o.slug, excerpt:o.excerpt, content:o.content, featuredImage:o.featuredImage ? { url:o.featuredImage.url, alt:o.featuredImageAlt || o.featuredImage.alt || '' } : undefined, category:o.category ? { name:o.category, slug:o.categorySlug } : undefined, tags:o.tags, author:{ name:o.author }, contentType:o.contentType, readingTime:o.readingTime, wordCount:o.wordCount, publishedAt:o.publishedAt, seo:o.seo, seriesName:o.seriesName, seriesPart:o.seriesPart, warnings:o.warnings, relatedBooks:o.relatedBooks, createdAt:o.createdAt, updatedAt:o.updatedAt };
 }
+export function snapshotFeaturedImage(image) {
+  return image?.toObject?.() || (image ? { ...image } : undefined);
+}
 export async function saveBlog(data, admin, existing, file) {
   const b = existing || new Blog(); const beforeSlug = b.slug; const manuallySet = data.slug && data.slug !== beforeSlug;
+  const previousFeaturedImage = snapshotFeaturedImage(b.featuredImage);
   Object.assign(b, data);
   if (!existing || manuallySet) b.slug = await uniqueSlug(b.title, data.slug || b.title, existing?._id);
   else if (!beforeSlug) b.slug = await uniqueSlug(b.title, b.title);
@@ -53,7 +57,11 @@ export async function saveBlog(data, admin, existing, file) {
   if (data.relatedBooks?.length) { const n=await Book.countDocuments({_id:{$in:data.relatedBooks}}); if(n!==new Set(data.relatedBooks).size) throw new AppError(400,'One or more related books do not exist','BAD_BOOK'); }
   let uploaded;
   if(file) uploaded=await uploadImage(file,'blogs');
-  if (uploaded) { const old=b.featuredImage; b.featuredImage={...uploaded,alt:b.featuredImageAlt}; }
+  if (uploaded) {
+    b.featuredImage={...uploaded,alt:b.featuredImageAlt};
+    if (previousFeaturedImage?.publicId && b.seo?.ogImage?.publicId === previousFeaturedImage.publicId) b.seo.ogImage={...uploaded,alt:b.featuredImageAlt};
+    if (previousFeaturedImage?.publicId && b.seo?.twitterImage?.publicId === previousFeaturedImage.publicId) b.seo.twitterImage={...uploaded,alt:b.featuredImageAlt};
+  }
   b.content=sanitizeHtml(b.content); b.plainText=plain(b.content); b.wordCount=b.plainText ? b.plainText.split(/\s+/).length : 0; b.readingTime=Math.max(1,Math.ceil(b.wordCount/200)); b.estimatedReadingTime=b.readingTime;
   if (b.status==='published') { if(!b.content || !b.plainText) throw new AppError(400,'Content is required before publishing','VALIDATION_ERROR'); if(!b.publishedAt) b.publishedAt=new Date(); b.scheduledAt=undefined; }
   if (manuallySet && beforeSlug && existing.status==='published' && !b.slugHistory.includes(beforeSlug)) b.slugHistory.push(beforeSlug);
@@ -63,7 +71,7 @@ export async function saveBlog(data, admin, existing, file) {
   if (b.seo.canonicalUrl && await Blog.exists({ 'seo.canonicalUrl': b.seo.canonicalUrl, ...(b._id ? { _id: { $ne: b._id } } : {}) })) throw new AppError(409,'Canonical URL is already assigned to another blog','DUPLICATE_CANONICAL');
   if (b.featuredImage) b.featuredImage.alt=b.featuredImageAlt;
   await b.save();
-  if(uploaded && existing?.featuredImage?.publicId) await destroyAssets([existing.featuredImage]);
+  if(uploaded && previousFeaturedImage?.publicId) await destroyAssets([previousFeaturedImage]);
   return b;
 }
 export async function listBlogs(q, admin=false) {
